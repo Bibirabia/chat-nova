@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Chat Hub</title>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- QR Code Generator Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/13.1.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/13.1.0/firebase-auth-compat.js"></script>
+    
+    <script src="https://www.gstatic.com/firebasejs/13.1.0/firebase-storage-compat.js"></script>
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="theme-blue font-inter dark-mode">
+
+    <!-- AUTHENTICATION SCREEN -->
+    <div id="auth-screen" class="screen active">
+        <div class="auth-card">
+            <div class="auth-header">
+                <i class="fa-solid fa-comments auth-logo"></i>
+                <h2>ChatHub</h2>
+                <p id="auth-subtitle" data-i18n="auth_subtitle">Connect with friends and communities</p>
+            </div>
+            
+            <form id="auth-form">
+                <div class="input-group" id="name-group">
+                    <i class="fa-solid fa-user"></i>
+                    <input type="text" id="auth-name" placeholder="Full Name">
+                </div>
+                <div class="input-group">
+                    <i class="fa-solid fa-envelope"></i>
+                    <input type="email" id="auth-email" placeholder="Email Address" required>
+                </div>
+                <div class="input-group">
+                    <i class="fa-solid fa-lock"></i>
+                    <input type="password" id="auth-password" placeholder="Password" required>
+                </div>
+                <button type="submit" id="auth-btn" class="btn primary-btn">Sign In</button>
+            </form>
+
+            <div class="auth-toggle">
+                <span id="auth-toggle-text">Don't have an account?</span>
+                <a href="#" id="auth-toggle-btn">Sign Up</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN APP SCREEN -->
+    <div id="app-screen" class="screen">
+        
+        <!-- SIDEBAR NAV -->
+        <nav class="sidebar">
+            <div class="nav-top">
+                <div class="profile-avatar" id="user-avatar-btn">
+                    <img id="user-avatar-img" src="https://via.placeholder.com/40" alt="Profile">
+                    <span class="status-indicator online"></span>
+                </div>
+                <div class="nav-links">
+                    <button class="nav-btn active" data-tab="chats" title="Chats"><i class="fa-solid fa-message"></i></button>
+                    <button class="nav-btn" data-tab="status" title="Status/Stories"><i class="fa-solid fa-circle-notch"></i></button>
+                    <button class="nav-btn" data-tab="communities" title="Communities"><i class="fa-solid fa-users-rectangle"></i></button>
+                    <button class="nav-btn" data-tab="settings" title="Settings"><i class="fa-solid fa-gear"></i></button>
+                </div>
+            </div>
+            <div class="nav-bottom">
+                <button id="logout-btn" class="nav-btn" title="Logout"><i class="fa-solid fa-right-from-bracket"></i></button>
+            </div>
+        </nav>
+
+        <!-- CHATS & DIRECTORY PANEL -->
+        <div class="directory-panel">
+            <div class="panel-header">
+                <h1 id="panel-title" data-i18n="chats">Chats</h1>
+                <div class="panel-actions">
+                    <button id="new-chat-btn" title="New Chat"><i class="fa-solid fa-pen-to-square"></i></button>
+                    <button id="create-group-btn" title="New Group"><i class="fa-solid fa-user-group"></i></button>
+                </div>
+            </div>
+
+            <div class="search-box">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="search-input" placeholder="Search..." data-i18n-ph="search">
+            </div>
+
+            <!-- CHATS LIST -->
+            <div id="chats-tab" class="tab-content active">
+                <div class="chat-list" id="chat-list">
+                    <!-- Dynamic chat items populate here -->
+                </div>
+            </div>
+
+            <!-- STATUS/STORIES TAB -->
+            <div id="status-tab" class="tab-content">
+                <div class="status-section">
+                    <div class="my-status" id="add-status-btn">
+                        <div class="avatar-wrapper">
+                            <img id="my-status-avatar" src="https://via.placeholder.com/40" alt="My Status">
+                            <i class="fa-solid fa-plus add-icon"></i>
+                        </div>
+                        <div class="status-info">
+                            <h4 data-i18n="my_status">My Status</h4>
+                            <p data-i18n="tap_add_status">Tap to add status update</p>
+                        </div>
+                    </div>
+                    <h5 class="section-title">Recent Updates</h5>
+                    <div class="status-list" id="status-list"></div>
+                </div>
+            </div>
+
+            <!-- COMMUNITIES TAB -->
+            <div id="communities-tab" class="tab-content">
+                <div class="community-list" id="community-list">
+                    <!-- Communities populate here -->
+                </div>
+            </div>
+
+            <!-- SETTINGS TAB -->
+            <div id="settings-tab" class="tab-content">
+                <div class="settings-group">
+                    <h3 data-i18n="appearance">Appearance</h3>
+                    <div class="setting-item">
+                        <span>Dark Mode</span>
+                        <label class="switch">
+                            <input type="checkbox" id="theme-toggle" checked>
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <span>Color Theme</span>
+                        <div class="color-options">
+                            <span class="color-dot blue active" data-color="blue"></span>
+                            <span class="color-dot purple" data-color="purple"></span>
+                            <span class="color-dot green" data-color="green"></span>
+                            <span class="color-dot orange" data-color="orange"></span>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <span>Font Style</span>
+                        <select id="font-select">
+                            <option value="font-inter">Inter</option>
+                            <option value="font-roboto">Roboto</option>
+                            <option value="font-poppins">Poppins</option>
+                            <option value="font-serif">Serif</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="settings-group">
+                    <h3 data-i18n="language">Language</h3>
+                    <div class="setting-item">
+                        <span>Select Language</span>
+                        <select id="language-select">
+                            <option value="en">English</option>
+                            <option value="es">Español</option>
+                            <option value="fr">Français</option>
+                            <option value="ar">العربية (Arabic)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MAIN CHAT AREA -->
+        <main class="chat-area">
+            <div id="no-chat-selected" class="empty-state">
+                <i class="fa-solid fa-paper-plane"></i>
+                <h3 data-i18n="welcome_title">Welcome to ChatHub</h3>
+                <p data-i18n="welcome_subtitle">Select a conversation or start a new one to begin messaging.</p>
+            </div>
+
+            <div id="active-chat-container" class="active-chat-container hidden">
+                <!-- CHAT HEADER -->
+                <div class="chat-header">
+                    <div class="chat-header-info">
+                        <img id="chat-target-avatar" src="https://via.placeholder.com/40" alt="Avatar">
+                        <div>
+                            <h3 id="chat-target-name">User Name</h3>
+                            <span id="chat-target-status" class="sub-text">Online</span>
+                        </div>
+                    </div>
+                    <div class="chat-header-actions">
+                        <button id="start-voice-call" title="Voice Call"><i class="fa-solid fa-phone"></i></button>
+                        <button id="start-video-call" title="Video Call"><i class="fa-solid fa-video"></i></button>
+                        <button id="show-qr-btn" title="Group QR Code"><i class="fa-solid fa-qrcode"></i></button>
+                    </div>
+                </div>
+
+                <!-- MESSAGES CONTAINER -->
+                <div class="messages-container" id="messages-container">
+                    <!-- Messages render dynamically -->
+                </div>
+
+                <!-- INPUT BAR -->
+                <div class="chat-input-bar">
+                    <div class="attachment-actions">
+                        <label for="img-upload" title="Send Image"><i class="fa-solid fa-image"></i></label>
+                        <input type="file" id="img-upload" accept="image/*" hidden>
+                        
+                        <label for="doc-upload" title="Send Document"><i class="fa-solid fa-file"></i></label>
+                        <input type="file" id="doc-upload" accept=".pdf,.doc,.docx,.txt" hidden>
+
+                        <button id="send-location-btn" title="Send Location"><i class="fa-solid fa-location-dot"></i></button>
+                    </div>
+
+                    <input type="text" id="message-input" placeholder="Type a message..." data-i18n-ph="type_message">
+
+                    <div class="input-actions">
+                        <button id="voice-note-btn" title="Record Voice Note"><i class="fa-solid fa-microphone"></i></button>
+                        <button id="send-btn" class="primary-btn"><i class="fa-solid fa-paper-plane"></i></button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- CALL OVERLAY MODAL -->
+    <div id="call-modal" class="modal hidden">
+        <div class="call-container">
+            <div class="video-grid">
+                <video id="remote-video" autoplay playsinline></video>
+                <video id="local-video" autoplay playsinline muted></video>
+            </div>
+            <div class="call-controls">
+                <button id="toggle-mic" class="call-btn"><i class="fa-solid fa-microphone"></i></button>
+                <button id="end-call" class="call-btn danger"><i class="fa-solid fa-phone-slash"></i></button>
+                <button id="toggle-cam" class="call-btn"><i class="fa-solid fa-video"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- QR CODE MODAL -->
+    <div id="qr-modal" class="modal hidden">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>Group Join QR Code</h3>
+                <i class="fa-solid fa-xmark close-modal"></i>
+            </div>
+            <div id="qrcode"></div>
+            <p class="sub-text">Scan to join this chat group</p>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
